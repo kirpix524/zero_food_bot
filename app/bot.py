@@ -1,23 +1,22 @@
 from telebot import TeleBot
-
-from repository.category_repo import CategoryRepository
-
+from typing import Any, Dict
 
 class ZeroFoodBot(TeleBot):
-    def __init__(self, token: str) -> None:
+    def __init__(self, token):
         super().__init__(token)
-        self._category_repository: CategoryRepository = None  # type: ignore
+        self._repositories: Dict[str, Any] = {}
 
-    def set_category_repository(self, repository: CategoryRepository) -> None:
-        """
-        Сохраняет репозиторий категорий в контексте бота.
-        """
-        self._category_repository = repository
+    def set_category_repository(self, repo):
+        self._repositories["category"] = repo
 
-    def get_category_repository(self) -> CategoryRepository:
-        """
-        Возвращает ранее сохранённый репозиторий категорий.
-        """
-        if self._category_repository is None:
-            raise ValueError("CategoryRepository не установлен")
-        return self._category_repository
+    def set_dish_repository(self, repo):
+        self._repositories["dish"] = repo
+
+    def get_dish_repository(self):
+        return self._repositories.get("dish")
+
+    def set_dish_storage(self, storage):
+        self._repositories["dish_storage"] = storage
+
+    def get_dish_storage(self):
+        return self._repositories.get("dish_storage")
