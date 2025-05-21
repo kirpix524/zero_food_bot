@@ -9,7 +9,7 @@ class FeedbackRepository:
         self._storage = storage
 
     def create(self, feedback: 'Feedback') -> None:
-        pass
+        self._storage.save(feedback)
 
     def get_latest(self, n: int) -> List['Feedback']:
         pass
