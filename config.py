@@ -15,6 +15,8 @@ config = load_config()
 TG_API_KEY = config["tg_api_key"]
 ADMINS = config["admins"]
 LOGS_DIRECTORY = config["logs_directory"]
+SQL_DATA = {"db_path": config["db_path"],
+                   "orders_table": config["orders_table_name"]}
 debug_mode = config["debug_mode"]
 if debug_mode==1:
     TG_API_KEY = config["debug_tg_api_key"]
