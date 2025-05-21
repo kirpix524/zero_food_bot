@@ -1,14 +1,14 @@
 # repository/dish_repo.py
 
+from models.dish import Dish
 from typing import List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from storage.dish_storage import DishStorage
-    from models.dish import Dish
 
 class DishRepository:
     def __init__(self, storage: 'DishStorage') -> None:
-        self._storage: 'DishStorage' = storage
+        self._storage = storage
 
     def get_by_category(self, category_id: int) -> List['Dish']:
         return self._storage.load_by_category(category_id)
@@ -23,16 +23,13 @@ class DishRepository:
 class DishRepo:
     @staticmethod
     def initialize(storage: 'DishStorage'):
-        """
-        Временная загрузка тестовых данных
-        """
         test_dishes = [
             Dish(
                 id=1,
                 category_id=1,
                 name="Греческий салат «Афины»",
                 short_description="Освежающий микс овощей с брынзой и оливками",
-                description="Хрустящие огурцы и помидоры, сочный болгарский перец...",
+                description="Хрустящие огурцы и помидоры...",
                 price=450,
                 photo_url="images/salads/Greek salad Athens/01.png"
             ),
