@@ -1,6 +1,5 @@
 from typing import Any
 
-from app.bot import ZeroFoodBot
 from config import SQL_DATA
 from storage.category_storage import CategoryStorage
 from storage.db_session import DBSession
