@@ -43,9 +43,7 @@ class Order:
         return self._created_at
 
     def update_item(self, item: OrderItem):
-        for i in self._items:
-            if i.id == item.id:
-                self._items.remove(i)
+        self.del_item(item)
         self._items.append(item)
 
     def get_item_by_dish_id(self, dish_id: int) -> Optional[OrderItem]:
@@ -54,5 +52,7 @@ class Order:
                 return item
         return None
 
-    def del_item(self, item: OrderItem):
-        pass
+    def del_item(self, item: OrderItem) -> None:
+        for i in self._items:
+            if i.id == item.id:
+                self._items.remove(i)

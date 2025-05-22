@@ -13,7 +13,7 @@ class OrderRepository:
     def get_in_cart(self, user_id: int) -> Optional['Order']:
         pass
 
-    def create(self, user_id: int) -> Order:
+    def create(self, user_id: int) -> 'Order':
         pass
 
     def save(self, order: 'Order') -> None:
