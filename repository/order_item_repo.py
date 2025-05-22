@@ -8,15 +8,30 @@ if TYPE_CHECKING:
 class OrderItemRepository:
     def __init__(self, storage: 'OrderItemStorage') -> None:
         self._storage: 'OrderItemStorage' = storage
+        self._repository: List['OrderItem'] = storage.load_all()
+
+    def __get_new_id(self) -> int:
+        return max((item.id for item in self._repository), default=0) + 1
 
     def add_item(self, order_id: int, dish_id: int, quantity: int) -> None:
-        pass
+        new_id: int = self.__get_new_id()
+        new_item: OrderItem = OrderItem(id=new_id, order_id=order_id, dish_id=dish_id, quantity=quantity)
+        self._repository.append(new_item)
+        self._storage.save(new_item)
 
     def update_quantity(self, item_id: int, quantity: int) -> None:
-        pass
+        for item in self._repository:
+            if item.id == item_id:
+                item.quantity = quantity
+                self._storage.save(item)
+                return
 
-    def get_by_order(self, order_id: int) -> List[OrderItem]:
-        pass
+    def get_by_order(self, order_id: int) -> List['OrderItem']:
+        return [item for item in self._repository if item.order_id == order_id]
 
     def delete_item(self, item_id: int) -> None:
-        pass
+        for index, item in enumerate(self._repository):
+            if item.id == item_id:
+                del self._repository[index]
+                self._storage.delete(item_id)
+                return

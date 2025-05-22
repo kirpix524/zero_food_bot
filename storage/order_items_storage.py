@@ -17,5 +17,11 @@ class OrderItemStorage:
     def save(self, item: 'OrderItem') -> None:
         pass
 
+    def delete(self, item_id: int) -> None:
+        pass
+
+    def load_all(self) -> List['OrderItem']:
+        pass
+
     def load_by_order(self, order_id: int) -> List['OrderItem']:
         pass
