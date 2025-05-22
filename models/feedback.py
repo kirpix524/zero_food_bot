@@ -1,8 +1,9 @@
+from datetime import datetime
 from typing import Optional
 
 
 class Feedback:
-    def __init__(self, id: int, user_id: int, order_id: Optional[int], text: str, created_at: str):
+    def __init__(self, id: int, user_id: int, order_id: Optional[int], text: str, created_at: datetime):
         self._id = id
         self._user_id = user_id
         self._order_id = order_id
@@ -26,5 +27,5 @@ class Feedback:
         return self._text
 
     @property
-    def created_at(self) -> str:
+    def created_at(self) -> datetime:
         return self._created_at
