@@ -28,14 +28,14 @@ def init_handlers(bot: ZeroFoodBot) -> None:
         bot.answer_callback_query(callback_query_id=callback_query.id, text=response_text)
 
     # Запрос отзыва
-    @bot.bot.message_handler(commands=['review'])
+    @bot.message_handler(commands=['review'])
     def leave_review(message: types.Message) -> None:
         user_id = message.from_user.id
         user_states[user_id] = "awaiting_review"
-        bot.bot.send_message(message.chat.id, "Пожалуйста, напишите ваш отзыв:")
+        bot.send_message(message.chat.id, "Пожалуйста, напишите ваш отзыв:")
 
     # Получение отзыва, обработка отзыва и запись отзыва в базу отзывов
-    @bot.bot.message_handler(content_types=['text'])
+    @bot.message_handler(content_types=['text'])
     def handle_message(message: types.Message) -> None:
         user_id = message.from_user.id
         text = message.text
@@ -44,27 +44,27 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             username = message.from_user.username or "Без ника"
             from database import save_review
             save_review(user_id, username, text)
-            bot.bot.send_message(message.chat.id, "Спасибо за ваш отзыв!")
+            bot.send_message(message.chat.id, "Спасибо за ваш отзыв!")
             user_states[user_id] = None
         else:
-            bot.bot.send_message(message.chat.id, "Я не ожидал сообщение от вас. Используйте команды.")
+            bot.send_message(message.chat.id, "Я не ожидал сообщение от вас. Используйте команды.")
 
     # Функция админа - вывод всех отзывов
-    @bot.bot.message_handler(commands=['admin_reviews'])
+    @bot.message_handler(commands=['admin_reviews'])
     def admin_reviews(message: types.Message) -> None:
-        from config import ADMIN_ID
+        from config import ADMINS
         from database import get_all_reviews
 
         user_id = message.from_user.id
 
-        if user_id != ADMIN_ID:
-            bot.bot.send_message(message.chat.id, "У вас нет доступа к этой команде.")
+        if user_id not in ADMINS:
+            bot.send_message(message.chat.id, "У вас нет доступа к этой команде.")
             return
 
         reviews = get_all_reviews()
 
         if not reviews:
-            bot.bot.send_message(message.chat.id, "Отзывов пока нет.")
+            bot.send_message(message.chat.id, "Отзывов пока нет.")
             return
 
         message_text = "📋 Все отзывы:\n\n"
@@ -79,5 +79,5 @@ def init_handlers(bot: ZeroFoodBot) -> None:
         max_length = 4096
         for i in range(0, len(message_text), max_length):
             chunk = message_text[i:i + max_length]
-            bot.bot.send_message(message.chat.id, chunk)
+            bot.send_message(message.chat.id, chunk)
         bot.answer_callback_query(callback_query_id=callback_query.id, text=response_text)
