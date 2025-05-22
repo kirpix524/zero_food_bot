@@ -15,7 +15,7 @@ class FeedbackRepository:
             return 1
         return max(feedback.id for feedback in self._repository) + 1
 
-    def new_feedback(self, user_id: int, text: str, order_id: Optional[int]) -> 'Feedback':
+    def new_feedback(self, user_id: int, text: str, order_id: Optional[int] = None) -> 'Feedback':
         id=self._get_new_feedback_id()
         feedback = Feedback(id, user_id, order_id, text, datetime.now())
         self._storage.save(feedback)

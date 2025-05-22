@@ -92,6 +92,17 @@ def init_handlers(bot: ZeroFoodBot) -> None:
         try:
             quantity = int(message.text)
             total_price = dish.price * quantity
+            order = bot.get_order_repository().get_in_cart(message.from_user.id)
+            if not order:
+                order = bot.get_order_repository().create(message.from_user.id)
+
+            order_item = order.get_item_by_dish_id(dish.id)
+            if not order_item:
+                order_item = bot.get_order_item_repository().create(order.id, dish.id, quantity)
+            else:
+                order_item.quantity += quantity
+            order.update_item(order_item)
+            bot.get_order_repository().save(order)
             bot.send_message(
                 message.chat.id,
                 f"Добавлено в корзину:\n{dish.name} x{quantity}\nИтого: {total_price} ₽",
@@ -124,9 +135,7 @@ def init_handlers(bot: ZeroFoodBot) -> None:
         text = message.text
 
         if user_states.get(user_id) == "awaiting_review":
-            username = message.from_user.username or "Без ника"
-            from database import save_review
-            save_review(user_id, username, text)
+            bot.get_feedback_repository().new_feedback(user_id, text)
             bot.send_message(message.chat.id, "Спасибо за ваш отзыв!")
             user_states[user_id] = None
         else:
@@ -136,7 +145,6 @@ def init_handlers(bot: ZeroFoodBot) -> None:
     @bot.message_handler(commands=['admin_reviews'])
     def admin_reviews(message: types.Message) -> None:
         from config import ADMINS
-        from database import get_all_reviews
 
         user_id = message.from_user.id
 

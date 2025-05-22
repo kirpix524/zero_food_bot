@@ -1,18 +1,5 @@
 from telebot import types
 
-def get_category_menu():
-    markup = types.InlineKeyboardMarkup()
-    categories = [
-        (1, "Салаты"),
-        (2, "Супы"),
-        (3, "Основные блюда"),
-        (4, "Десерты"),
-        (5, "Напитки")
-    ]
-    for category_id, name in categories:
-        markup.add(types.InlineKeyboardButton(text=name, callback_data=f"category_{category_id}"))
-    return markup
-
 def get_dish_keyboard(dish_id):
     markup = types.InlineKeyboardMarkup()
     btn_details = types.InlineKeyboardButton("Подробнее", callback_data=f"details_{dish_id}")

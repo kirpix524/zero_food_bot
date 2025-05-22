@@ -16,12 +16,11 @@ class OrderRepository:
     def create(self, user_id: int) -> Order:
         pass
 
+    def save(self, order: 'Order') -> None:
+        pass
+
     def update_status(self, order_id: int, status: 'OrderStatus') -> None:
         pass
 
     def get_all_by_user(self, user_id: int) -> List['Order']:
         pass
-
-
-class OrderRepo:
-    pass

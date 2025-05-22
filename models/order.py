@@ -7,11 +7,11 @@ from models.order_item import OrderItem
 
 class Order:
     def __init__(self, id: int, user_id: int, status: OrderStatus, created_at: datetime, payment_method: Optional[PaymentMethod]):
-        self._id = id
-        self._user_id = user_id
-        self._status = status
-        self._payment_method = payment_method
-        self._created_at = created_at
+        self._id: int = id
+        self._user_id: int = user_id
+        self._status: OrderStatus = status
+        self._payment_method: Optional[PaymentMethod] = payment_method
+        self._created_at: datetime = created_at
         self._items: list[OrderItem] = []
 
     @property
@@ -42,8 +42,17 @@ class Order:
     def created_at(self) -> datetime:
         return self._created_at
 
-    def add_item(self, item: OrderItem):
+    def update_item(self, item: OrderItem):
+        for i in self._items:
+            if i.id == item.id:
+                self._items.remove(i)
         self._items.append(item)
+
+    def get_item_by_dish_id(self, dish_id: int) -> Optional[OrderItem]:
+        for item in self._items:
+            if item.dish_id == dish_id:
+                return item
+        return None
 
     def del_item(self, item: OrderItem):
         pass
