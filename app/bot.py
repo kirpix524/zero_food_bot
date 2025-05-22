@@ -4,13 +4,23 @@ from typing import Any, Dict,Optional
 from builders.category_builder import CategoryMenuBuilder
 from repository.category_repo import CategoryRepository
 from repository.dish_repo import DishRepository
+from repository.feedback_repo import FeedbackRepository
+from repository.order_item_repo import OrderItemRepository
+from repository.order_repo import OrderRepository
+from repository.user_repo import UserRepository
 
 
 class ZeroFoodBot(TeleBot):
     def __init__(self, token):
         super().__init__(token)
+        #репозитории
         self._category_repository: Optional[CategoryRepository] = None  # type: ignore
         self._dish_repository: Optional[DishRepository] = None
+        self._feedback_repository: Optional[FeedbackRepository] = None
+        self._order_repository: Optional[OrderRepository] = None
+        self._order_item_repository: Optional[OrderItemRepository] = None
+        self._user_repository: Optional[UserRepository] = None
+        #билдеры
         self._category_menu_builder: Optional[CategoryMenuBuilder] = None
 
     def set_category_repository(self, repository: CategoryRepository) -> None:
@@ -31,6 +41,30 @@ class ZeroFoodBot(TeleBot):
 
     def get_dish_repository(self) -> DishRepository | None:
         return self._dish_repository
+
+    def set_feedback_repository(self, repo: 'FeedbackRepository') -> None:
+        self._feedback_repository = repo
+
+    def get_feedback_repository(self) -> FeedbackRepository | None:
+        return self._feedback_repository
+
+    def set_order_repository(self, repo: 'OrderRepository') -> None:
+        self._order_repository = repo
+
+    def get_order_repository(self) -> OrderRepository | None:
+        return self._order_repository
+
+    def set_order_item_repository(self, repo: 'OrderItemRepository') -> None:
+        self._order_item_repository = repo
+
+    def get_order_item_repository(self) -> OrderItemRepository | None:
+        return self._order_item_repository
+
+    def set_user_repository(self, repo: 'UserRepository') -> None:
+        self._user_repository = repo
+
+    def get_user_repository(self) -> UserRepository | None:
+        return self._user_repository
 
     @property
     def category_menu_builder(self) -> CategoryMenuBuilder:

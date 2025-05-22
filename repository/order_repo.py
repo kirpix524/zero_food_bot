@@ -10,16 +10,16 @@ class OrderRepository:
     def __init__(self, storage: 'OrderStorage') -> None:
         self._storage = storage
         
-    def get_in_cart(self, user_id: int) -> Optional[Order]:
+    def get_in_cart(self, user_id: int) -> Optional['Order']:
         pass
 
     def create(self, user_id: int) -> Order:
         pass
 
-    def update_status(self, order_id: int, status: OrderStatus) -> None:
+    def update_status(self, order_id: int, status: 'OrderStatus') -> None:
         pass
 
-    def get_all_by_user(self, user_id: int) -> List[Order]:
+    def get_all_by_user(self, user_id: int) -> List['Order']:
         pass
 
 

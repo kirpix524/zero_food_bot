@@ -144,7 +144,7 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             bot.send_message(message.chat.id, "У вас нет доступа к этой команде.")
             return
 
-        reviews = get_all_reviews()
+        reviews = bot.get_feedback_repository().get_all()
 
         if not reviews:
             bot.send_message(message.chat.id, "Отзывов пока нет.")
@@ -163,4 +163,3 @@ def init_handlers(bot: ZeroFoodBot) -> None:
         for i in range(0, len(message_text), max_length):
             chunk = message_text[i:i + max_length]
             bot.send_message(message.chat.id, chunk)
-        bot.answer_callback_query(callback_query_id=callback_query.id, text=response_text)

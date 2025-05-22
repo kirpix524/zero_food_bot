@@ -26,3 +26,6 @@ class FeedbackRepository:
 
     def get_latest(self, n: int) -> List['Feedback']:
         pass
+
+    def get_all(self) -> List['Feedback']:
+        return self._repository
