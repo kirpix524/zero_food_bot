@@ -2,6 +2,7 @@ from telebot import types
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.bot import ZeroFoodBot
+from builders.main_menu_builder import MainMenuBuilder
 from keyboards.inline_keyboards import get_dish_keyboard, get_continue_checkout
 
 # Храним временные состояния пользователей
@@ -14,6 +15,12 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             return
         markup: InlineKeyboardMarkup = bot.category_menu_builder.build_menu()
         bot.send_message(chat_id=message.chat.id, text="Пожалуйста, выберите категорию:", reply_markup=markup)
+
+    #отображение главного меню
+    @bot.message_handler(commands=['start'])
+    def cmd_start(message: types.Message) -> None:
+        markup = MainMenuBuilder.build_menu(message.from_user.id)
+        bot.send_message(chat_id=message.chat.id, text="Выберите действие:", reply_markup=markup)
 
     #отображение категорий меню
     @bot.message_handler(commands=['show_menu'])
@@ -29,6 +36,13 @@ def init_handlers(bot: ZeroFoodBot) -> None:
         else:
             response_text: str = "Категория не найдена"
         bot.answer_callback_query(callback_query_id=callback_query.id, text=response_text)
+
+    #отображение заказов
+    @bot.message_handler(commands=['show_orders'])
+    def show_orders(message: types.Message) -> None:
+        pass
+
+
 
     @bot.callback_query_handler(func=lambda call: call.data.startswith('category_'))
     def show_dishes_by_category(call):
@@ -97,7 +111,7 @@ def init_handlers(bot: ZeroFoodBot) -> None:
 
 
     # Запрос отзыва
-    @bot.message_handler(commands=['review'])
+    @bot.message_handler(commands=['add_feedback'])
     def leave_review(message: types.Message) -> None:
         user_id = message.from_user.id
         user_states[user_id] = "awaiting_review"
