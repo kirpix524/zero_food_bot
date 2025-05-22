@@ -8,22 +8,27 @@ if TYPE_CHECKING:
 
 class DishRepository:
     def __init__(self, storage: 'DishStorage') -> None:
-        self._storage = storage
+        self._storage: 'DishStorage' = storage
+        self._dishes: List['Dish'] = self._storage.load_all()
+
 
     def get_by_category(self, category_id: int) -> List['Dish']:
-        return self._storage.load_by_category(category_id)
+        """
+        Retrieve all dishes matching the given category_id.
+        """
+        return [dish for dish in self._dishes if dish.category_id == category_id]
 
     def get_by_id(self, id: int) -> Optional['Dish']:
-        return self._storage.load_by_id(id)
+        """
+        Retrieve a single dish by its id.
+        """
+        for dish in self._dishes:
+            if dish.id == id:
+                return dish
+        return None
 
-    def create_bulk(self, dishes: List['Dish']) -> None:
-        self._storage.save_all(dishes)
-
-
-class DishRepo:
-    @staticmethod
-    def initialize(storage: 'DishStorage'):
-        test_dishes = [
+    def create_test_dishes(self) -> None:
+        self._dishes = [
             Dish(
                 id=1,
                 category_id=1,
@@ -43,5 +48,3 @@ class DishRepo:
                 photo_url="images/salads/Salad with roasted beetroot and goat's cheese/01.png"
             )
         ]
-        repo = DishRepository(storage)
-        repo.create_bulk(test_dishes)
