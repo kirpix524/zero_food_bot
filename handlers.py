@@ -26,28 +26,6 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             response_text: str = "Категория не найдена"
         bot.answer_callback_query(callback_query_id=callback_query.id, text=response_text)
 
-    # Запрос отзыва
-    @bot.bot.message_handler(commands=['review'])
-    def leave_review(message: types.Message) -> None:
-        user_id = message.from_user.id
-        user_states[user_id] = "awaiting_review"
-        bot.bot.send_message(message.chat.id, "Пожалуйста, напишите ваш отзыв:")
-
-    # Получение отзыва, обработка отзыва и запись отзыва в базу отзывов
-    @bot.bot.message_handler(content_types=['text'])
-    def handle_message(message: types.Message) -> None:
-        user_id = message.from_user.id
-        text = message.text
-
-        if user_states.get(user_id) == "awaiting_review":
-            username = message.from_user.username or "Без ника"
-            from database import save_review
-            save_review(user_id, username, text)
-            bot.bot.send_message(message.chat.id, "Спасибо за ваш отзыв!")
-            user_states[user_id] = None
-        else:
-            bot.bot.send_message(message.chat.id, "Я не ожидал сообщение от вас. Используйте команды.")
-
     # Функция админа - вывод всех отзывов
     @bot.bot.message_handler(commands=['admin_reviews'])
     def admin_reviews(message: types.Message) -> None:
@@ -80,3 +58,25 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             chunk = message_text[i:i + max_length]
             bot.bot.send_message(message.chat.id, chunk)
         bot.answer_callback_query(callback_query_id=callback_query.id, text=response_text)
+    
+    # Запрос отзыва
+    @bot.bot.message_handler(commands=['review'])
+    def leave_review(message: types.Message) -> None:
+        user_id = message.from_user.id
+        user_states[user_id] = "awaiting_review"
+        bot.bot.send_message(message.chat.id, "Пожалуйста, напишите ваш отзыв:")
+
+    # Получение отзыва, обработка отзыва и запись отзыва в базу отзывов
+    @bot.bot.message_handler(content_types=['text'])
+    def handle_message(message: types.Message) -> None:
+        user_id = message.from_user.id
+        text = message.text
+
+        if user_states.get(user_id) == "awaiting_review":
+            username = message.from_user.username or "Без ника"
+            from database import save_review
+            save_review(user_id, username, text)
+            bot.bot.send_message(message.chat.id, "Спасибо за ваш отзыв!")
+            user_states[user_id] = None
+        else:
+            bot.bot.send_message(message.chat.id, "Я не ожидал сообщение от вас. Используйте команды.")
