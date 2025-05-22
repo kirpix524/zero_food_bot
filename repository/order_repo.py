@@ -21,3 +21,7 @@ class OrderRepository:
 
     def get_all_by_user(self, user_id: int) -> List[Order]:
         pass
+
+
+class OrderRepo:
+    pass
