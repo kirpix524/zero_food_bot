@@ -1,10 +1,13 @@
+import os
+
 from telebot import types
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
+
 
 from app.bot import ZeroFoodBot
 from builders.main_menu_builder import MainMenuBuilder
 from keyboards.inline_keyboards import get_dish_keyboard, get_continue_checkout
-
+from config import DEFAULT_IMG_PATH
 # Храним временные состояния пользователей
 user_states = {}
 
@@ -96,15 +99,13 @@ def init_handlers(bot: ZeroFoodBot) -> None:
         category_id: int = int(callback_query.data.split(":", 1)[1])
         category = bot.get_category_repository().get_by_id(category_id)
         if category:
-            response_text: str = f"Вы выбрали категорию «{category.name}»"
+            show_dishes_by_category(callback_query, category.id)
         else:
             response_text: str = "Категория не найдена"
-        bot.answer_callback_query(callback_query_id=callback_query.id, text=response_text)
+            bot.answer_callback_query(callback_query_id=callback_query.id, text=response_text)
 
-    @bot.callback_query_handler(func=lambda call: call.data.startswith('category_'))
-    def show_dishes_by_category(call):
+    def show_dishes_by_category(call, category_id):
         print("show_dishes_by_category")
-        category_id = int(call.data.split('_')[1])
         dishes = bot.get_dish_repository().get_by_category(category_id)
 
         if not dishes:
@@ -112,17 +113,30 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             return
 
         for dish in dishes:
+            # Определяем, какой путь к фото использовать
+            if dish.photo_url and os.path.exists(dish.photo_url):
+                photo_path = dish.photo_url
+            else:
+                photo_path = DEFAULT_IMG_PATH
+
             try:
-                with open(dish.photo_url, 'rb') as photo:
+                with open(photo_path, 'rb') as photo:
                     bot.send_photo(
                         chat_id=call.message.chat.id,
                         photo=photo,
-                        caption=f"<b>{dish.name}</b>\n{dish.short_description}\n\nЦена: {dish.price} ₽",
+                        caption=(
+                            f"<b>{dish.name}</b>\n"
+                            f"{dish.short_description}\n\n"
+                            f"Цена: {dish.price} ₽"
+                        ),
                         parse_mode='HTML',
                         reply_markup=get_dish_keyboard(dish.id)
                     )
             except Exception as e:
-                bot.send_message(call.message.chat.id, f"Ошибка при отображении {dish.name}: {e}")
+                bot.send_message(
+                    call.message.chat.id,
+                    f"Ошибка при отображении {dish.name}: {e}"
+                )
 
     @bot.callback_query_handler(func=lambda call: call.data.startswith('details_'))
     def show_dish_details(call):
