@@ -22,3 +22,6 @@ class OrderStorage:
 
     def load_by_user(self, user_id: int) -> List['Order']:
         pass
+
+    def load_all(self) -> List['Order']:
+        return []

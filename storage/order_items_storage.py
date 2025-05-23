@@ -21,7 +21,7 @@ class OrderItemStorage:
         pass
 
     def load_all(self) -> List['OrderItem']:
-        pass
+        return []
 
     def load_by_order(self, order_id: int) -> List['OrderItem']:
         pass

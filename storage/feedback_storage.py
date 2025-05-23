@@ -21,4 +21,4 @@ class FeedbackStorage:
         pass
 
     def load_all(self) -> List['Feedback']:
-        pass
+        return []

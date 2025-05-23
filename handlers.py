@@ -31,17 +31,17 @@ def init_handlers(bot: ZeroFoodBot) -> None:
     # Запрос отзыва
     def leave_review(message: types.Message) -> None:
         print("leave_review")
-        user_id = message.from_user.id
+        user_id = message.chat.id
         user_states[user_id] = "awaiting_review"
         bot.send_message(message.chat.id, "Пожалуйста, напишите ваш отзыв:")
         return
 
     # Функция админа - вывод всех отзывов
     def admin_reviews(message: types.Message) -> None:
-        print("admin_reviews")
+        print(f"admin_reviews {message.from_user.id} {message.from_user.username}")
         from config import ADMINS
 
-        user_id = message.from_user.id
+        user_id = message.chat.id
 
         if user_id not in ADMINS:
             bot.send_message(message.chat.id, "У вас нет доступа к этой команде.")
@@ -55,10 +55,9 @@ def init_handlers(bot: ZeroFoodBot) -> None:
 
         message_text = "📋 Все отзывы:\n\n"
         for review in reviews:
-            _, user_id, username, text, created_at = review
-            message_text += f"📅 {created_at}\n"
-            message_text += f"👤 ID: {user_id}, @{username}\n"
-            message_text += f"📝 Отзыв: {text}\n"
+            message_text += f"📅 {review.created_at.strftime('%d.%m.%Y %H:%M')}\n"
+            message_text += f"👤 @{review.user_name}\n"
+            message_text += f"📝 Отзыв: {review.text}\n"
             message_text += "-" * 30 + "\n"
 
         # Разбиваем на части, если слишком длинное
@@ -166,26 +165,29 @@ def init_handlers(bot: ZeroFoodBot) -> None:
         print("ask_quantity")
         try:
             quantity = int(message.text)
-            total_price = dish.price * quantity
-            order = bot.get_order_repository().get_in_cart(message.from_user.id)
-            if not order:
-                order = bot.get_order_repository().create(message.from_user.id)
-
-            order_item = order.get_item_by_dish_id(dish.id)
-            if not order_item:
-                order_item = bot.get_order_item_repository().create(order.id, dish.id, quantity)
-            else:
-                order_item.quantity += quantity
-            order.update_item(order_item)
-            bot.get_order_repository().save(order)
-            bot.send_message(
-                message.chat.id,
-                f"Добавлено в корзину:\n{dish.name} x{quantity}\nИтого: {total_price} ₽",
-                reply_markup=get_continue_checkout()
-            )
         except ValueError:
             bot.send_message(message.chat.id, "Введите число!")
             bot.register_next_step_handler(message, lambda m: ask_quantity(m, dish))
+            return
+
+        total_price = dish.price * quantity
+        order = bot.get_order_repository().get_in_cart(message.from_user.id)
+        if not order:
+            order = bot.get_order_repository().create(message.from_user.id)
+
+        order_item = order.get_item_by_dish_id(dish.id)
+        if not order_item:
+            order_item = bot.get_order_item_repository().new_item(order_id=order.id, dish_id=dish.id, dish_name=dish.name, dish_price=dish.price, quantity= quantity)
+        else:
+            order_item.quantity += quantity
+        order.update_item(order_item)
+        bot.get_order_repository().save(order)
+        bot.send_message(
+            message.chat.id,
+                f"Добавлено в корзину:\n{dish.name} x{quantity}\nИтого: {total_price} ₽",
+            reply_markup=get_continue_checkout()
+        )
+
 
     @bot.callback_query_handler(func=lambda call: call.data == 'continue_shopping')
     def continue_shopping(call):
@@ -201,11 +203,12 @@ def init_handlers(bot: ZeroFoodBot) -> None:
     @bot.message_handler(content_types=['text'])
     def handle_message(message: types.Message) -> None:
         print("handle_message")
-        user_id = message.from_user.id
+        user_id = message.chat.id
+        user_name = message.chat.username
         text = message.text
 
         if user_states.get(user_id) == "awaiting_review":
-            bot.get_feedback_repository().new_feedback(user_id, text)
+            bot.get_feedback_repository().new_feedback(user_id, user_name, text)
             bot.send_message(message.chat.id, "Спасибо за ваш отзыв!")
             user_states[user_id] = None
         else:

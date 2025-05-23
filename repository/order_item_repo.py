@@ -1,8 +1,7 @@
 from typing import List, TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from storage.order_items_storage import OrderItemStorage
-    from models.order_item import OrderItem
+from storage.order_items_storage import OrderItemStorage
+from models.order_item import OrderItem
 
 
 class OrderItemRepository:
