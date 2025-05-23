@@ -26,7 +26,31 @@ def init_handlers(bot: ZeroFoodBot) -> None:
 
     # отображение корзины
     def show_cart(message: types.Message) -> None:
-        bot.send_message(message.chat.id, "Ваша корзина будет здесь")
+        print("show_cart")
+        user_id = message.chat.id
+
+        # Получаем текущий заказ со статусом "IN_CART"
+        order = bot.get_order_repository().get_in_cart(user_id)
+
+        if not order or not order.items:
+            # Если нет заказа или он пустой
+            bot.send_message(user_id, "🧺 Ваша корзина пуста.")
+            return
+
+        # Формируем сообщение со списком блюд
+        total = 0
+        text = "🛒 <b>Ваша корзина:</b>\n\n"
+        for item in order.items:
+            subtotal = item.quantity * item.dish_price
+            total += subtotal
+            text += f"🍽 {item.dish_name} x{item.quantity} — {subtotal}₽\n"
+        text += f"\n💰 <b>Итого:</b> {total}₽"
+
+        # Добавляем кнопку "Оформить заказ"
+        markup = InlineKeyboardMarkup().add(
+            InlineKeyboardButton("✅ Оформить заказ", callback_data="confirm_order")
+        )
+        bot.send_message(user_id, text, parse_mode='HTML', reply_markup=markup)
 
     # Запрос отзыва
     def leave_review(message: types.Message) -> None:
@@ -213,3 +237,36 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             user_states[user_id] = None
         else:
             bot.send_message(message.chat.id, "Я не ожидал сообщение от вас. Используйте команды.")
+
+    @bot.callback_query_handler(func=lambda call: call.data == 'confirm_order')
+    def confirm_order(call: types.CallbackQuery) -> None:
+        print("confirm_order")
+        user_id = call.from_user.id
+
+        # Снова получаем заказ — на случай, если он изменился
+        order = bot.get_order_repository().get_in_cart(user_id)
+
+        if not order:
+            # Если заказа нет — сообщаем
+            bot.answer_callback_query(call.id, text="Корзина пуста.")
+            return
+
+        # Меняем статус заказа на "PENDING"
+        order.status = "PENDING"
+        bot.get_order_repository().save(order)
+
+        # Сообщаем пользователю об успешном оформлении
+        bot.edit_message_text(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            text="✅ Ваш заказ успешно оформлен! Ожидайте подтверждения."
+        )
+
+        # Уведомляем админов о новом заказе
+        from config import ADMINS
+        for admin_id in ADMINS:
+            bot.send_message(
+                admin_id,
+                f"🆕 Новый заказ от пользователя {user_id}.\n"
+                f"Сумма: {sum(i.quantity * i.dish_price for i in order.items)}₽"
+            )
