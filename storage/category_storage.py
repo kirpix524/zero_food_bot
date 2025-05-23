@@ -22,3 +22,6 @@ class CategoryStorage:
 
     def load_all(self) -> List['Category']:
         return []
+
+    def del_all(self) -> None:
+        pass

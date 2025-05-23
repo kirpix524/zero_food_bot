@@ -13,13 +13,18 @@ class CategoryRepository:
         self._categories: List['Category'] = self._storage.load_all()
 
     def get_all(self) -> List['Category']:
-        return self._storage.load_all()
+        return self._categories
 
     def get_by_id(self, id: int) -> Optional['Category']:
-        pass
+        for category in self._categories:
+            if category.id == id:
+                return category
+        return None
 
     def create(self, category: 'Category') -> None:
-        pass
+        self._categories.append(category)
+        self._storage.save(category)
 
     def del_all(self) -> None:
-        pass
+        self._categories.clear()
+        self._storage.del_all()
