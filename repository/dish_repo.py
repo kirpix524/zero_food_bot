@@ -11,6 +11,13 @@ class DishRepository:
         self._storage: 'DishStorage' = storage
         self._dishes: List['Dish'] = self._storage.load_all()
 
+    def del_all(self) -> None:
+        self._storage.del_all()
+        self._dishes = []
+
+    def add_bulk(self, dishes: List['Dish']) -> None:
+        self._dishes.extend(dishes)
+        self._storage.save_all(self._dishes)
 
     def get_by_category(self, category_id: int) -> List['Dish']:
         """

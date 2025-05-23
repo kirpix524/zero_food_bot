@@ -21,4 +21,4 @@ class CategoryStorage:
         pass
 
     def load_all(self) -> List['Category']:
-        pass
+        return []

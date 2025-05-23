@@ -1,7 +1,8 @@
 from telebot import TeleBot
 from typing import Any, Dict,Optional
 
-from builders.category_builder import CategoryMenuBuilder
+from app.menu_loader import MenuLoader
+from builders.category_menu_builder import CategoryMenuBuilder
 from repository.category_repo import CategoryRepository
 from repository.dish_repo import DishRepository
 from repository.feedback_repo import FeedbackRepository
@@ -20,6 +21,8 @@ class ZeroFoodBot(TeleBot):
         self._order_item_repository: Optional[OrderItemRepository] = None
         #билдеры
         self._category_menu_builder: Optional[CategoryMenuBuilder] = None
+        #загрузчики информации из файлов
+        self._menu_loader: Optional[MenuLoader] = None
 
     def set_category_repository(self, repository: CategoryRepository) -> None:
         """
@@ -59,5 +62,13 @@ class ZeroFoodBot(TeleBot):
         return self._order_item_repository
 
     @property
-    def category_menu_builder(self) -> CategoryMenuBuilder:
+    def category_menu_builder(self) -> CategoryMenuBuilder | None:
         return self._category_menu_builder
+
+    @property
+    def menu_loader(self) -> MenuLoader | None:
+        return self._menu_loader
+
+    @menu_loader.setter
+    def menu_loader(self, loader: MenuLoader) -> None:
+        self._menu_loader = loader

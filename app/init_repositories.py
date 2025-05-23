@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, Any
 
+from app.menu_loader import MenuLoader
 from repository.category_repo import CategoryRepository
 from repository.feedback_repo import FeedbackRepository
 from repository.order_item_repo import OrderItemRepository
@@ -24,6 +25,9 @@ def init_repositories(bot: 'ZeroFoodBot', storage_list: dict[str, Any]) -> None:
     bot.set_feedback_repository(FeedbackRepository(feedback_storage))
     bot.set_order_item_repository(OrderItemRepository(order_items_storage))
     bot.set_order_repository(OrderRepository(order_storage))
+
+    #загрузчик меню из файла
+    bot.menu_loader = MenuLoader(bot.get_category_repository(), bot.get_dish_repository())
 
     # Загрузка тестовых данных
     bot.get_dish_repository().create_test_dishes()

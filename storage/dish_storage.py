@@ -21,3 +21,6 @@ class DishStorage:
 
     def save_all(self, dishes: List['Dish']) -> None:
         pass
+
+    def del_all(self) -> None:
+        pass
