@@ -5,5 +5,9 @@
   "debug_mode" : 0,
   "logs_directory_deb" : "logs/",
   "db_path": "data/database.db",
-  "orders_table_name": "orders"
+  "orders_table_name": "orders",
+  "categories_table_name": "categories",
+  "dishes_table_name": "dishes",
+  "feedback_table_name": "feedbacks",
+  "order_items_table_name": "order_items"
 }
