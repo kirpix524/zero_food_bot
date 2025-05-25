@@ -1,8 +1,6 @@
 from typing import List, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from models.feedback import Feedback
-    from storage.db_session import DBSession
+from models.feedback import Feedback
+from storage.db_session import DBSession
 
 
 class FeedbackStorage:
