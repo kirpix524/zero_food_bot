@@ -1,6 +1,3 @@
-from models.dish import Dish
-
-
 class OrderItem:
     def __init__(self, id: int, order_id: int, dish_id: int, dish_name: str, dish_price: float, quantity: int):
         self._id = id
