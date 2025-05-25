@@ -1,6 +1,5 @@
 from typing import List, Optional
 from datetime import datetime
-import sqlite3
 
 from models.feedback import Feedback
 from storage.db_session import DBSession
@@ -14,7 +13,7 @@ class FeedbackStorage:
 
     def _init_table(self) -> None:
         """Создаёт таблицу для хранения отзывов по имени из sql_data, если она не существует."""
-        conn: sqlite3.Connection = self._db_session.get_session()
+        conn = self._db_session.get_session()
         cursor = conn.cursor()
         table_name: str = self._sql_data['feedback_table_name']
         cursor.execute(f"""
@@ -32,7 +31,7 @@ class FeedbackStorage:
 
     def save(self, feedback: Feedback) -> None:
         """Сохраняет объект Feedback в базу данных. Если запись с таким id существует — обновляет её."""
-        conn: sqlite3.Connection = self._db_session.get_session()
+        conn = self._db_session.get_session()
         cursor = conn.cursor()
         table_name: str = self._sql_data['feedback_table_name']
         cursor.execute(
@@ -54,7 +53,7 @@ class FeedbackStorage:
 
     def load_latest(self, n: int) -> List[Feedback]:
         """Загружает последние n отзывов, отсортированных по дате создания по убыванию."""
-        conn: sqlite3.Connection = self._db_session.get_session()
+        conn = self._db_session.get_session()
         cursor = conn.cursor()
         table_name: str = self._sql_data['feedback_table_name']
         cursor.execute(
@@ -75,7 +74,7 @@ class FeedbackStorage:
 
     def load_all(self) -> List[Feedback]:
         """Загружает все отзывы из базы данных."""
-        conn: sqlite3.Connection = self._db_session.get_session()
+        conn = self._db_session.get_session()
         cursor = conn.cursor()
         table_name: str = self._sql_data['feedback_table_name']
         cursor.execute(
