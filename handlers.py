@@ -6,8 +6,10 @@ from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.bot import ZeroFoodBot
 from builders.main_menu_builder import MainMenuBuilder
-from keyboards.inline_keyboards import get_dish_keyboard, get_continue_checkout
+from keyboards.inline_keyboards import get_dish_keyboard, get_continue_checkout, get_dish_keyboard_with_add
 from config import DEFAULT_IMG_PATH
+from models.enums import OrderStatus
+
 # Храним временные состояния пользователей
 user_states = {}
 
@@ -153,7 +155,7 @@ def init_handlers(bot: ZeroFoodBot) -> None:
                             f"Цена: {dish.price} ₽"
                         ),
                         parse_mode='HTML',
-                        reply_markup=get_dish_keyboard(dish.id)
+                        reply_markup=get_dish_keyboard_with_add(dish.id)
                     )
             except Exception as e:
                 bot.send_message(
@@ -167,10 +169,17 @@ def init_handlers(bot: ZeroFoodBot) -> None:
         dish_id = int(call.data.split('_')[1])
         dish = bot.get_dish_repository().get_by_id(dish_id)
         if dish:
-            bot.send_message(
-                call.message.chat.id,
-                f"<b>Подробное описание:</b>\n{dish.description}",
-                parse_mode='HTML'
+            # получаем существующий caption (подпись к фото)
+            existing_caption: str = call.message.caption or ""
+            # формируем новый caption, дописывая описание к старому
+            new_caption: str = f"{existing_caption}\n\n<b>Подробное описание:</b>\n{dish.description}"
+
+            bot.edit_message_caption(
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+                caption=new_caption,
+                parse_mode='HTML',
+                reply_markup=get_dish_keyboard(dish.id)
             )
 
     @bot.callback_query_handler(func=lambda call: call.data.startswith('add_'))
@@ -252,7 +261,7 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             return
 
         # Меняем статус заказа на "PENDING"
-        order.status = "PENDING"
+        order.status = OrderStatus.PENDING
         bot.get_order_repository().save(order)
 
         # Сообщаем пользователю об успешном оформлении

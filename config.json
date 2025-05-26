@@ -1,5 +1,6 @@
 {
   "admins" : [463653491],
+  "admin_group_id": "-1002541571453",
   "logs_directory" : "logs/",
   "default_img": "images/default_img.png",
   "debug_mode" : 0,

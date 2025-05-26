@@ -24,7 +24,7 @@ def init_repositories(bot: 'ZeroFoodBot', storage_list: dict[str, Any]) -> None:
     bot.set_dish_repository(DishRepository(dish_storage))
     bot.set_feedback_repository(FeedbackRepository(feedback_storage))
     bot.set_order_item_repository(OrderItemRepository(order_items_storage))
-    bot.set_order_repository(OrderRepository(order_storage))
+    bot.set_order_repository(OrderRepository(order_storage, bot.get_order_item_repository()))
 
     #загрузчик меню из файла
     bot.menu_loader = MenuLoader(bot.get_category_repository(), bot.get_dish_repository())

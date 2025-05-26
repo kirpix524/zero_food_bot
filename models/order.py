@@ -46,6 +46,10 @@ class Order:
     def items(self) -> list[OrderItem]:
         return self._items
 
+    @items.setter
+    def items(self, items: list[OrderItem]):
+        self._items = items
+
     def update_item(self, item: OrderItem):
         self.del_item(item)
         self._items.append(item)

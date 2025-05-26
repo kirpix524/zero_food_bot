@@ -38,6 +38,7 @@ class DishStorage:
             f"SELECT id, category_id, name, short_description, description, price, photo_url FROM {table_name}"
         )
         rows = cursor.fetchall()
+        conn.close()
         return [
             Dish(
                 id=row[0],
@@ -76,6 +77,7 @@ class DishStorage:
             ]
         )
         conn.commit()
+        conn.close()
 
     def del_all(self) -> None:
         """Удаляет все записи из таблицы блюд."""
@@ -84,3 +86,4 @@ class DishStorage:
         table_name: str = self._sql_data['dishes_table_name']
         cursor.execute(f"DELETE FROM {table_name}")
         conn.commit()
+        conn.close()

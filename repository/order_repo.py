@@ -1,16 +1,19 @@
 from datetime import datetime
 from typing import Optional, List
 
-
+from repository.order_item_repo import OrderItemRepository
 from storage.order_storage import OrderStorage
 from models.enums import OrderStatus
 from models.order import Order
 
 
 class OrderRepository:
-    def __init__(self, storage: 'OrderStorage') -> None:
+    def __init__(self, storage: 'OrderStorage', item_repo: OrderItemRepository) -> None:
         self._storage = storage
+        self._item_repo = item_repo
         self._orders: List['Order'] = storage.load_all()
+        for order in self._orders:
+            order.items = self._item_repo.get_by_order(order.id)
 
     def __get_new_id(self):
         if len(self._orders) == 0:

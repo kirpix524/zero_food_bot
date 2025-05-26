@@ -1,10 +1,16 @@
 from telebot import types
 
-def get_dish_keyboard(dish_id):
+def get_dish_keyboard_with_add(dish_id):
     markup = types.InlineKeyboardMarkup()
     btn_details = types.InlineKeyboardButton("Подробнее", callback_data=f"details_{dish_id}")
     btn_add = types.InlineKeyboardButton("В корзину", callback_data=f"add_{dish_id}")
     markup.row(btn_details)
+    markup.row(btn_add)
+    return markup
+
+def get_dish_keyboard(dish_id):
+    markup = types.InlineKeyboardMarkup()
+    btn_add = types.InlineKeyboardButton("В корзину", callback_data=f"add_{dish_id}")
     markup.row(btn_add)
     return markup
 

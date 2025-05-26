@@ -27,6 +27,7 @@ class CategoryStorage:
             """
         )
         conn.commit()
+        conn.close()
 
     def save(self, category: Category) -> None:
         """
@@ -44,6 +45,7 @@ class CategoryStorage:
             (category.id, category.name)
         )
         conn.commit()
+        conn.close()
 
     def load_all(self) -> List[Category]:
         """
@@ -54,7 +56,9 @@ class CategoryStorage:
         conn = self._db_session.get_session()
         cursor = conn.execute(f"SELECT id, name FROM {table}")
         rows = cursor.fetchall()
+        conn.close()
         return [Category(id=row[0], name=row[1]) for row in rows]
+
 
     def del_all(self) -> None:
         """
@@ -64,4 +68,5 @@ class CategoryStorage:
         conn = self._db_session.get_session()
         conn.execute(f"DELETE FROM {table}")
         conn.commit()
+        conn.close()
 

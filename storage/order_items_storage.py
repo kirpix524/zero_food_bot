@@ -27,6 +27,7 @@ class OrderItemStorage:
             """
         )
         conn.commit()
+        conn.close()
 
     def save(self, item: 'OrderItem') -> None:
         """Сохраняет объект OrderItem в базу данных. Если запись с таким id существует — обновляет её."""
@@ -49,6 +50,7 @@ class OrderItemStorage:
             )
         )
         conn.commit()
+        conn.close()
 
     def delete(self, item_id: int) -> None:
         """Удаляет позицию заказа по её id."""
@@ -60,6 +62,7 @@ class OrderItemStorage:
             (item_id,)
         )
         conn.commit()
+        conn.close()
 
     def load_all(self) -> List['OrderItem']:
         """Загружает все позиции заказов из базы данных."""
@@ -70,6 +73,7 @@ class OrderItemStorage:
             f"SELECT id, order_id, dish_id, dish_name, dish_price, quantity FROM {table_name}"
         )
         rows = cursor.fetchall()
+        conn.close()
         return [
             OrderItem(
                 id=row[0],
@@ -96,6 +100,7 @@ class OrderItemStorage:
             (order_id,)
         )
         rows = cursor.fetchall()
+        conn.close()
         return [
             OrderItem(
                 id=row[0],

@@ -29,6 +29,7 @@ class OrderStorage:
             """
         )
         conn.commit()
+        conn.close()
 
     def save(self, order: 'Order') -> None:
         """Сохраняет объект Order в базу данных. Если запись с таким id существует — обновляет её."""
@@ -50,6 +51,7 @@ class OrderStorage:
             )
         )
         conn.commit()
+        conn.close()
 
     def del_by_id(self, order_id: int) -> None:
         """Удаляет заказ по его id."""
@@ -58,17 +60,20 @@ class OrderStorage:
         table_name: str = self._sql_data['orders_table_name']
         cursor.execute(f"DELETE FROM {table_name} WHERE id = ?", (order_id,))
         conn.commit()
+        conn.close()
 
     def load_all(self) -> List['Order']:
         """Загружает все заказы из базы данных."""
         conn = self._db_session.get_session()
         cursor = conn.cursor()
         table_name: str = self._sql_data['orders_table_name']
+        items_table_name: str = self._sql_data['order_items_table_name']
         cursor.execute(
             f"SELECT id, user_id, status, created_at, payment_method FROM {table_name}"
         )
         rows = cursor.fetchall()
         orders: List[Order] = []
+        conn.close()
         for id_, user_id, status_str, created_at_str, payment_method_str in rows:
             status: OrderStatus = cast(OrderStatus, OrderStatus[status_str])
             created_at: datetime = datetime.fromisoformat(created_at_str)

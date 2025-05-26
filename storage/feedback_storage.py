@@ -28,6 +28,7 @@ class FeedbackStorage:
         """
         )
         conn.commit()
+        conn.close()
 
     def save(self, feedback: Feedback) -> None:
         """Сохраняет объект Feedback в базу данных. Если запись с таким id существует — обновляет её."""
@@ -50,6 +51,7 @@ class FeedbackStorage:
             )
         )
         conn.commit()
+        conn.close()
 
     def load_latest(self, n: int) -> List[Feedback]:
         """Загружает последние n отзывов, отсортированных по дате создания по убыванию."""
@@ -67,6 +69,7 @@ class FeedbackStorage:
         )
         rows = cursor.fetchall()
         feedbacks: List[Feedback] = []
+        conn.close()
         for id_, user_id, user_name, order_id, text, created_at_str in rows:
             created_at: datetime = datetime.fromisoformat(created_at_str)
             feedbacks.append(Feedback(id_, user_id, user_name, order_id, text, created_at))
@@ -86,6 +89,7 @@ class FeedbackStorage:
         )
         rows = cursor.fetchall()
         feedbacks: List[Feedback] = []
+        conn.close()
         for id_, user_id, user_name, order_id, text, created_at_str in rows:
             created_at: datetime = datetime.fromisoformat(created_at_str)
             feedbacks.append(Feedback(id_, user_id, user_name, order_id, text, created_at))
