@@ -20,7 +20,7 @@ storage_list = init_storage(db_session)
 # Теперь можно инициализировать репозитории
 init_repositories(bot, storage_list)
 
-bot.menu_loader.load_menu("new_menu.json")
+#bot.menu_loader.load_menu("new_menu.json")
 
 # И подключить обработчики
 init_handlers(bot)

@@ -127,7 +127,11 @@ def init_handlers(bot: ZeroFoodBot) -> None:
         elif command == "show_feedbacks":
             admin_reviews(callback_query.message)
         elif command == "load_menu":
-            pass
+            msg: types.Message = bot.send_message(
+                callback_query.message.chat.id,
+                "Пожалуйста, отправьте файл с новым меню:"
+            )
+            bot.register_next_step_handler(msg, handle_menu_file)
         elif command == "change_order_status":
             pass
 
@@ -318,3 +322,29 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             ADMIN_GROUP_ID,
             text
         )
+
+    def handle_menu_file(message: types.Message) -> None:
+        # Проверяем, что пользователь прислал документ
+        if not message.document:
+            bot.send_message(message.chat.id, "Это не файл. Пожалуйста, отправьте документ.")
+            bot.register_next_step_handler(message, handle_menu_file)
+            return
+
+        # Скачиваем файл
+        file_info = bot.get_file(message.document.file_id)
+        file_bytes: bytes = bot.download_file(file_info.file_path)
+
+        # Сохраняем локально
+        import os
+        os.makedirs("new_menus", exist_ok=True)
+        file_path: str = os.path.join("new_menus", message.document.file_name)
+        with open(file_path, 'wb') as f:
+            f.write(file_bytes)
+
+        # Загружаем меню через menu_loader
+        try:
+            bot.menu_loader.load_menu(file_path)
+            bot.send_message(message.chat.id, "✅ Новое меню успешно загружено.")
+        except Exception as e:
+            bot.send_message(message.chat.id, f"❗ Ошибка при загрузке меню: {e}")
+
