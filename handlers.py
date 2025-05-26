@@ -6,9 +6,9 @@ from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.bot import ZeroFoodBot
 from builders.main_menu_builder import MainMenuBuilder
-from keyboards.inline_keyboards import get_dish_keyboard, get_continue_checkout, get_dish_keyboard_with_add
+from keyboards.inline_keyboards import get_dish_keyboard, get_continue_checkout, get_dish_keyboard_with_add, select_payment_method_keyboard
 from config import DEFAULT_IMG_PATH
-from models.enums import OrderStatus
+from models.enums import OrderStatus, PaymentMethod
 
 # Храним временные состояния пользователей
 user_states = {}
@@ -203,7 +203,6 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             bot.register_next_step_handler(message, lambda m: ask_quantity(m, dish))
             return
 
-        total_price = dish.price * quantity
         order = bot.get_order_repository().get_in_cart(message.from_user.id)
         if not order:
             order = bot.get_order_repository().create(message.from_user.id)
@@ -213,11 +212,13 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             order_item = bot.get_order_item_repository().new_item(order_id=order.id, dish_id=dish.id, dish_name=dish.name, dish_price=dish.price, quantity= quantity)
         else:
             order_item.quantity += quantity
+            bot.get_order_item_repository().update_quantity(order_item.id, order_item.quantity)
         order.update_item(order_item)
         bot.get_order_repository().save(order)
+        text=f"Добавлено в корзину:\n{dish.name} x{quantity}\n Ваша корзина состоит из:\n"+order.get_order_text()
         bot.send_message(
             message.chat.id,
-                f"Добавлено в корзину:\n{dish.name} x{quantity}\nИтого: {total_price} ₽",
+                text,
             reply_markup=get_continue_checkout()
         )
 
@@ -260,22 +261,42 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             bot.answer_callback_query(call.id, text="Корзина пуста.")
             return
 
+        # Сообщаем пользователю, что он может выбрать способ оплаты
+        bot.send_message(
+            chat_id=call.message.chat.id,
+            text=f"Выберите способ оплаты для заказа номер {order.id}:",
+            reply_markup=select_payment_method_keyboard(order.id)
+        )
+
+
+    @bot.callback_query_handler(func=lambda call: call.data.startswith('select_payment_'))
+    def select_payment_method(call):
+        print("add_to_cart")
+        data = call.data.split('_')[2]
+        method = data.split(':')[0]
+        order_id = int(data.split(':')[1])
+        order = bot.get_order_repository().get_by_id(order_id)
+        if not order:
+            bot.answer_callback_query(call.id, text="Заказ не найден.")
+            return
+        if method == "cash":
+            order.payment_method = PaymentMethod.CASH
+        elif method == "card":
+            order.payment_method = PaymentMethod.ONLINE
         # Меняем статус заказа на "PENDING"
         order.status = OrderStatus.PENDING
         bot.get_order_repository().save(order)
 
         # Сообщаем пользователю об успешном оформлении
-        bot.edit_message_text(
+        bot.send_message(
             chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            text="✅ Ваш заказ успешно оформлен! Ожидайте подтверждения."
+            text=f"✅ Ваш заказ номер {order.id} успешно оформлен! В ближайшее время вам напишет оператор для подтверждения"
         )
 
+        text = f"🆕 Новый заказ от пользователя {order.user_id}.\n" + order.get_order_text()
         # Уведомляем админов о новом заказе
-        from config import ADMINS
-        for admin_id in ADMINS:
-            bot.send_message(
-                admin_id,
-                f"🆕 Новый заказ от пользователя {user_id}.\n"
-                f"Сумма: {sum(i.quantity * i.dish_price for i in order.items)}₽"
-            )
+        from config import ADMIN_GROUP_ID
+        bot.send_message(
+            ADMIN_GROUP_ID,
+            text
+        )

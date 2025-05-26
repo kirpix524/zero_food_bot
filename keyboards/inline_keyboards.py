@@ -20,3 +20,10 @@ def get_continue_checkout():
     btn_checkout = types.InlineKeyboardButton("Оформить заказ", callback_data="checkout")
     markup.row(btn_continue, btn_checkout)
     return markup
+
+def select_payment_method_keyboard(order_id: int):
+    markup = types.InlineKeyboardMarkup()
+    btn_cash = types.InlineKeyboardButton("Наличные", callback_data=f"select_payment_cash:{order_id}")
+    btn_card = types.InlineKeyboardButton("Карта", callback_data=f"select_payment_card:{order_id}")
+    markup.row(btn_cash, btn_card)
+    return markup

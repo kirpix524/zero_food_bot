@@ -27,6 +27,12 @@ class OrderRepository:
                 return order
         return None
 
+    def get_by_id(self, order_id: int) -> Optional[Order]:
+        for order in self._orders:
+            if order.id == order_id:
+                return order
+        return None
+
     def create(self, user_id: int) -> 'Order':
         order = Order(id=self.__get_new_id(), user_id=user_id, status=OrderStatus.IN_CART, created_at=datetime.now(), payment_method=None)
         self.save(order)

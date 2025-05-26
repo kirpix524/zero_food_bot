@@ -14,6 +14,7 @@ def load_config():
 config = load_config()
 TG_API_KEY = config["tg_api_key"]
 ADMINS = config["admins"]
+ADMIN_GROUP_ID = config["admin_group_id"]
 DEFAULT_IMG_PATH = config["default_img"]
 
 LOGS_DIRECTORY = config["logs_directory"]
