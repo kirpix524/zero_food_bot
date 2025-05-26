@@ -1,4 +1,4 @@
-from typing import List, TYPE_CHECKING
+from typing import List
 
 from storage.order_items_storage import OrderItemStorage
 from models.order_item import OrderItem

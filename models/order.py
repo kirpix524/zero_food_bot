@@ -42,6 +42,10 @@ class Order:
     def created_at(self) -> datetime:
         return self._created_at
 
+    @property
+    def items(self) -> list[OrderItem]:
+        return self._items
+
     def update_item(self, item: OrderItem):
         self.del_item(item)
         self._items.append(item)
