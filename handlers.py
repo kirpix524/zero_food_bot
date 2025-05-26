@@ -92,6 +92,22 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             chunk = message_text[i:i + max_length]
             bot.send_message(message.chat.id, chunk)
 
+    def clear_cart(message: types.Message) -> None:
+        print("clear_cart")
+        order = bot.get_order_repository().get_in_cart(message.chat.id)
+        if not order:
+            bot.send_message(message.chat.id, "🧺 Ваша корзина пуста.")
+            return
+
+        if not order.items:
+            bot.send_message(message.chat.id, "🧺 Ваша корзина пуста.")
+            return
+
+        for i in order.items :
+            bot.get_order_item_repository().delete_item(i.id)
+            order.del_item(i)
+        bot.get_order_repository().save(order)
+        bot.send_message(message.chat.id, "🧺 Корзина очищена.")
 
     #отображение главного меню
     @bot.callback_query_handler(func=lambda call: call.data and call.data.startswith("cmd_"))
@@ -102,6 +118,8 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             show_categories(callback_query.message)
         elif command == "show_cart":
             show_cart(callback_query.message)
+        elif command == "clear_cart":
+            clear_cart(callback_query.message)
         elif command == "show_orders":
             show_orders(callback_query.message)
         elif command == "add_feedback":
