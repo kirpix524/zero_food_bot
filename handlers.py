@@ -6,7 +6,7 @@ from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.bot import ZeroFoodBot
 from builders.main_menu_builder import MainMenuBuilder
-from keyboards.inline_keyboards import get_dish_keyboard, get_continue_checkout, get_dish_keyboard_with_add, select_payment_method_keyboard
+from keyboards.inline_keyboards import get_dish_keyboard, get_continue_checkout, get_dish_keyboard_with_add, select_payment_method_keyboard, select_order_to_change_status
 from config import DEFAULT_IMG_PATH
 from models.enums import OrderStatus, PaymentMethod
 
@@ -24,7 +24,12 @@ def init_handlers(bot: ZeroFoodBot) -> None:
 
     # отображение заказов
     def show_orders(message: types.Message) -> None:
-        bot.send_message(message.chat.id, "Ваши заказы будут здесь")
+        orders = bot.get_order_repository().get_all_by_user(message.chat.id)
+        bot.send_message(message.chat.id, "Ваши заказы:")
+        for order in orders:
+            if order.status == OrderStatus.IN_CART:
+                continue
+            bot.send_message(message.chat.id, order.get_order_text())
 
     # отображение корзины
     def show_cart(message: types.Message) -> None:
@@ -133,7 +138,13 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             )
             bot.register_next_step_handler(msg, handle_menu_file)
         elif command == "change_order_status":
-            pass
+            orders = bot.get_order_repository().get_orders_by_status(OrderStatus.PENDING)
+            orders.extend(bot.get_order_repository().get_orders_by_status(OrderStatus.PREPARING))
+            msg: types.Message = bot.send_message(
+                callback_query.message.chat.id,
+                "Выберите заказ, которому нужно присвоить следующий статус:",
+                reply_markup=select_order_to_change_status(orders)
+            )
 
     @bot.message_handler(commands=['start'])
     def cmd_start(message: types.Message) -> None:
@@ -290,6 +301,21 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             reply_markup=select_payment_method_keyboard(order.id)
         )
 
+    @bot.callback_query_handler(func=lambda call: call.data and call.data.startswith("order_change_status_select:"))
+    def change_order_status(callback_query: types.CallbackQuery) -> None:
+        order_id: int = int(callback_query.data.split(":", 1)[1])
+        order = bot.get_order_repository().get_by_id(order_id)
+        if order:
+            if order.status == OrderStatus.PENDING:
+                order.status = OrderStatus.PREPARING
+            elif order.status == OrderStatus.PREPARING:
+                order.status = OrderStatus.DONE
+            bot.get_order_repository().save(order)
+            bot.send_message(order.user_id, text=f"Статус вашего заказа {order.id} изменен на {order.status.get_name()}")
+
+        response_text: str = f"Статус заказа изменен на {order.status.get_name()}"
+        bot.send_message(chat_id=callback_query.message.chat.id, text=response_text)
+
 
     @bot.callback_query_handler(func=lambda call: call.data.startswith('select_payment_'))
     def select_payment_method(call):
@@ -347,4 +373,3 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             bot.send_message(message.chat.id, "✅ Новое меню успешно загружено.")
         except Exception as e:
             bot.send_message(message.chat.id, f"❗ Ошибка при загрузке меню: {e}")
-

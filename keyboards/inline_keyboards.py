@@ -1,4 +1,10 @@
+from typing import List
+
 from telebot import types
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+from models.order import Order
+
 
 def get_dish_keyboard_with_add(dish_id):
     markup = types.InlineKeyboardMarkup()
@@ -27,3 +33,15 @@ def select_payment_method_keyboard(order_id: int):
     btn_card = types.InlineKeyboardButton("Карта", callback_data=f"select_payment_card:{order_id}")
     markup.row(btn_cash, btn_card)
     return markup
+
+def select_order_to_change_status(orders: List[Order]) -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardMarkup(row_width=1)
+    buttons = [
+        InlineKeyboardButton(
+            text=f"№ {order.id} статус: {order.status.get_name()} сумма: {order.get_sum()}",
+            callback_data=f"order_change_status_select:{order.id}"
+            )
+        for order in orders
+    ]
+    keyboard.add(*buttons)
+    return keyboard

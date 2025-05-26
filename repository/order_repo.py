@@ -51,3 +51,6 @@ class OrderRepository:
     def get_all_by_user(self, user_id: int) -> List[Order]:
         # Возвращает все заказы, созданные данным пользователем
         return [order for order in self._orders if order.user_id == user_id]
+
+    def get_orders_by_status(self, status: OrderStatus) -> List[Order]:
+        return [order for order in self._orders if order.status == status]

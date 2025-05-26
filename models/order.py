@@ -65,13 +65,17 @@ class Order:
             if i.id == item.id:
                 self._items.remove(i)
 
+    def get_sum(self) -> int:
+        return sum([i.get_sum() for i in self._items])
+
     def get_order_text(self) -> str:
         if not self._items:
             return "🧺 корзина пуста."
         text = f"Заказ номер {self._id}\n"
+        text += f"Статус: {self._status.get_name()}\n"
         for item in self._items:
             text += f"🍽 {item.dish_name} x{item.quantity} — {item.dish_price}₽\n"
         text += f"\n💰 Итого: {sum([i.get_sum() for i in self._items])}₽"
         if self._payment_method:
-            text += f"\n💸 Способ оплаты: {self._payment_method.value}"
+            text += f"\n💸 Способ оплаты: {self._payment_method.get_name()}"
         return text
