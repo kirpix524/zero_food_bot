@@ -28,6 +28,3 @@ def init_repositories(bot: 'ZeroFoodBot', storage_list: dict[str, Any]) -> None:
 
     #загрузчик меню из файла
     bot.menu_loader = MenuLoader(bot.get_category_repository(), bot.get_dish_repository())
-
-    # Загрузка тестовых данных
-    bot.get_dish_repository().create_test_dishes()

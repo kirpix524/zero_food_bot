@@ -108,7 +108,10 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             bot.send_message(message.chat.id, "🧺 Ваша корзина пуста.")
             return
 
-        for i in order.items :
+        items = bot.get_order_item_repository().get_by_order(order.id)
+
+        for i in items:
+            print(f"deleting {i.id} {i.dish_name}")
             bot.get_order_item_repository().delete_item(i.id)
             order.del_item(i)
         bot.get_order_repository().save(order)
@@ -151,6 +154,10 @@ def init_handlers(bot: ZeroFoodBot) -> None:
         markup = MainMenuBuilder.build_menu(message.from_user.id)
         bot.send_message(chat_id=message.chat.id, text="Выберите действие:", reply_markup=markup)
 
+    @bot.message_handler(commands=['help'])
+    def cmd_help(message: types.Message) -> None:
+        bot.send_message(chat_id=message.chat.id, text="Нажмите start, добавьте блюда в корзину и оформите заказ")
+
     @bot.callback_query_handler(func=lambda call: call.data and call.data.startswith("category_select:"))
     def process_category(callback_query: types.CallbackQuery) -> None:
         print("process_category")
@@ -163,7 +170,7 @@ def init_handlers(bot: ZeroFoodBot) -> None:
             bot.answer_callback_query(callback_query_id=callback_query.id, text=response_text)
 
     def show_dishes_by_category(call, category_id):
-        print("show_dishes_by_category")
+        print(f"show_dishes_by_category {category_id}")
         dishes = bot.get_dish_repository().get_by_category(category_id)
 
         if not dishes:
@@ -258,13 +265,7 @@ def init_handlers(bot: ZeroFoodBot) -> None:
 
     @bot.callback_query_handler(func=lambda call: call.data == 'continue_shopping')
     def continue_shopping(call):
-        print("continue_shopping")
         show_categories(call.message)
-
-    @bot.callback_query_handler(func=lambda call: call.data == 'checkout')
-    def checkout_order(call):
-        print("checkout_order")
-        bot.send_message(call.message.chat.id, "Ваш заказ оформлен! Ожидайте.")
 
     # Получение отзыва, обработка отзыва и запись отзыва в базу отзывов
     @bot.message_handler(content_types=['text'])

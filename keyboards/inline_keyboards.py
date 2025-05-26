@@ -23,7 +23,7 @@ def get_dish_keyboard(dish_id):
 def get_continue_checkout():
     markup = types.InlineKeyboardMarkup()
     btn_continue = types.InlineKeyboardButton("Продолжить", callback_data="continue_shopping")
-    btn_checkout = types.InlineKeyboardButton("Оформить заказ", callback_data="checkout")
+    btn_checkout = types.InlineKeyboardButton("Оформить заказ", callback_data="confirm_order")
     markup.row(btn_continue, btn_checkout)
     return markup
 
