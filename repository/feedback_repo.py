@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import List, TYPE_CHECKING, Optional
 
-if TYPE_CHECKING:
-    from models.feedback import Feedback
-    from storage.feedback_storage import FeedbackStorage
+
+from models.feedback import Feedback
+from storage.feedback_storage import FeedbackStorage
 
 class FeedbackRepository:
     def __init__(self, storage: 'FeedbackStorage'):
@@ -15,9 +15,10 @@ class FeedbackRepository:
             return 1
         return max(feedback.id for feedback in self._repository) + 1
 
-    def new_feedback(self, user_id: int, text: str, order_id: Optional[int]) -> 'Feedback':
+    def new_feedback(self, user_id: int, user_name: str, text: str, order_id: Optional[int] = None) -> 'Feedback':
         id=self._get_new_feedback_id()
-        feedback = Feedback(id, user_id, order_id, text, datetime.now())
+        feedback = Feedback(id, user_id, user_name, order_id, text, datetime.now())
+        self._repository.append(feedback)
         self._storage.save(feedback)
         return feedback
 
@@ -26,3 +27,6 @@ class FeedbackRepository:
 
     def get_latest(self, n: int) -> List['Feedback']:
         pass
+
+    def get_all(self) -> List['Feedback']:
+        return self._repository
